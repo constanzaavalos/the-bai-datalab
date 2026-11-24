@@ -1,0 +1,4 @@
+The B-AI DataLab
+Version: 0.17.0
+Package purpose: local collaborator run package
+Default operation: deterministic-first, no API key required

@@ -1,0 +1,25 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
+
+# Secrets and local data
+**/.streamlit/secrets.toml
+**/data/*.db
+**/data/*.db-shm
+**/data/*.db-wal
+**/data/*.db-journal
+.env
+.env.*
+!.env.example

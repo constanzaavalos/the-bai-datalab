@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use The B-AI DataLab in research or teaching, please cite this software release."
+title: "The B-AI DataLab"
+type: software
+version: "0.17.0"
+date-released: 2026-08-28
+authors:
+  - family-names: "Perez Ruiz"
+    given-names: "Diego Andres"
+    orcid: "https://orcid.org/0000-0002-9969-6065"
+    affiliation: "The University of Manchester"
+license: MIT
+keywords:
+  - statistics education
+  - data science education
+  - generative AI
+  - statistical reasoning
+  - formative assessment
+  - educational technology
+repository-code: "https://github.com/REPLACE_WITH_GITHUB_USERNAME/the-bai-datalab"
+url: "https://github.com/REPLACE_WITH_GITHUB_USERNAME/the-bai-datalab"
+abstract: >-
+  The B-AI DataLab is a deterministic-first, AI-optional educational technology
+  environment for statistics and data science education. It supports reasoning
+  about analytical decisions through six laboratories: Model Doctor, Model Court,
+  Leakage Detective, Break the Model, Uncertainty Lab, and Human vs AI Statistician.

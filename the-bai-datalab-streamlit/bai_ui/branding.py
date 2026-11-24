@@ -1,0 +1,5 @@
+APP_NAME = "The B-AI DataLab"
+TAGLINE = "Reasoning-first support for Statistics and Data Science Education"
+PROVENANCE = "Developed in Manchester for Statistics and Data Science Education"
+AUTHOR = "Dr Diego Andres Perez Ruiz"
+CONTACT_EMAIL = "diego.perezruiz@manchester.ac.uk"
