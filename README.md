@@ -106,9 +106,14 @@ GitHub will expose citation metadata from [`CITATION.cff`](CITATION.cff). After 
 
 Released under the [MIT License](LICENSE).
 
-## Author
+## Authors
 
-**Diego Andres Perez Ruiz**  
+**Dr Diego Andres Perez Ruiz**  
 Department of Social Statistics, School of Social Sciences  
 The University of Manchester  
 ORCID: 0000-0002-9969-6065
+
+**Dr Constanza Avalos Valdebenito**  
+Department of Social Statistics, School of Social Sciences  
+The University of Manchester  
+ORCID: 0000-0003-2747-4639

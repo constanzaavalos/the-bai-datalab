@@ -9,6 +9,10 @@ authors:
     given-names: "Diego Andres"
     orcid: "https://orcid.org/0000-0002-9969-6065"
     affiliation: "The University of Manchester"
+  - family-names: "Avalos Valdebenito"
+    given-names: "Constanza"
+    orcid: "https://orcid.org/0000-0003-2747-4639"
+    affiliation: "The University of Manchester"
 license: MIT
 keywords:
   - statistics education
@@ -17,8 +21,8 @@ keywords:
   - statistical reasoning
   - formative assessment
   - educational technology
-repository-code: "https://github.com/REPLACE_WITH_GITHUB_USERNAME/the-bai-datalab"
-url: "https://github.com/REPLACE_WITH_GITHUB_USERNAME/the-bai-datalab"
+repository-code: "https://github.com/constanzaavalos/the-bai-datalab"
+url: "https://github.com/constanzaavalos/the-bai-datalab"
 abstract: >-
   The B-AI DataLab is a deterministic-first, AI-optional educational technology
   environment for statistics and data science education. It supports reasoning
