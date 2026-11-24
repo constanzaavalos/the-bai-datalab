@@ -2,6 +2,8 @@ import streamlit as st
 
 from bai_ui.branding import AUTHOR, CONTACT_EMAIL, PROVENANCE
 from bai_ui.components import render_next_lab_banner
+from bai_ui.participant import get_participant_code, get_pilot_session_id
+from persistence import log_activity
 
 # ---------------------------------------------------------------------------
 # Styles
@@ -333,14 +335,28 @@ with tab_model:
             "reasoning": reasoning, "case": case_name,
         }
         if len(reasoning.split()) < 12:
+            mc_status = "too_brief"
             st.warning("Your defence is too brief to evaluate. Identify evidence and explain why it matters.")
         elif score >= .67:
+            mc_status = "resolved"
             st.success("Your defence engages with multiple relevant statistical considerations.")
             missing = [x for x in case["checks"] if x not in covered]
             if missing:
                 st.html(f'<div class="bai-info">&#9889; One more angle to examine: {case["nudge"]}</div>')
         else:
+            mc_status = "follow_up"
             st.html(f'<div class="bai-info">&#9889; Deterministic challenge: {case["nudge"]}</div>')
+        log_activity(
+            participant_code=get_participant_code(),
+            session_id=get_pilot_session_id(),
+            lab="Model Court",
+            case_id=case_name,
+            event_type="defence_submitted",
+            choice=choice,
+            response_text=reasoning,
+            status=mc_status,
+            score=score,
+        )
 
 # ===========================================================================
 # TAB 4 — DISCUSSION

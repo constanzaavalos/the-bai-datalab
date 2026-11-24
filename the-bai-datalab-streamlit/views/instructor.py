@@ -14,6 +14,8 @@ from persistence import (
     recent_sessions,
     attempts_for_session,
     export_attempts_rows,
+    export_activity_events,
+    is_gsheets_configured,
 )
 
 from auth import instructor_is_authenticated
@@ -125,6 +127,32 @@ if rows:
     )
 else:
     st.caption("No attempts are available to export.")
+
+st.divider()
+st.markdown("### Cross-lab pilot activity log")
+if is_gsheets_configured():
+    st.success("Google Sheets live logging is **connected** — all pilot events are being saved permanently to your Google Sheet.")
+else:
+    st.info(
+        "Google Sheets live logging is not configured yet (events are currently saved to local SQLite only). "
+        "Add `[google_sheets]` to Streamlit Secrets to persist logs across cloud restarts."
+    )
+
+activity_rows = export_activity_events()
+if activity_rows:
+    st.dataframe(activity_rows[-100:], hide_index=True, use_container_width=True)
+    act_buf = io.StringIO()
+    act_writer = csv.DictWriter(act_buf, fieldnames=list(activity_rows[0].keys()))
+    act_writer.writeheader()
+    act_writer.writerows(activity_rows)
+    st.download_button(
+        "Download all cross-lab pilot logs (CSV)",
+        data=act_buf.getvalue(),
+        file_name="bai_datalab_pilot_activity_log.csv",
+        mime="text/csv",
+    )
+else:
+    st.caption("No cross-lab activity events recorded in this container yet.")
 
 st.divider()
 st.caption(f"Developed by {AUTHOR} · Feedback: {CONTACT_EMAIL}")

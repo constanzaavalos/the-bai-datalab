@@ -8,8 +8,9 @@ from bai_datalab.socratic import StudentResponse, SocraticStatus
 from bai_datalab.pedagogy import PedagogicalState, Strictness, evaluate_attempt
 from bai_ui.branding import AUTHOR, CONTACT_EMAIL, PROVENANCE
 from bai_ui.components import render_next_lab_banner
+from bai_ui.participant import get_participant_code, get_pilot_session_id
 from persistence import (
-    init_db, create_session, save_findings, save_attempt, finish_session
+    init_db, create_session, save_findings, save_attempt, finish_session, log_activity,
 )
 
 # ---------------------------------------------------------------------------
@@ -278,7 +279,7 @@ with tab_data:
             st.session_state.pedagogical_states = {}
 
             session_id = create_session(
-                student_code=st.session_state.session_uuid,
+                student_code=get_participant_code(),
                 assignment_name="Model Doctor pilot",
                 strictness=STRICTNESS.value,
                 llm_provider="deterministic",
@@ -286,6 +287,14 @@ with tab_data:
             )
             save_findings(session_id, analysed.findings)
             st.session_state.db_session_id = session_id
+            log_activity(
+                participant_code=get_participant_code(),
+                session_id=get_pilot_session_id(),
+                lab="Model Doctor",
+                case_id=", ".join(a.name for a in artifacts),
+                event_type="bundle_analysed",
+                status=f"{len(analysed.findings)}_findings",
+            )
             st.rerun()
 
     result = st.session_state.bundle_result
@@ -459,6 +468,19 @@ with tab_model:
                                 hint_level=latest.hint_level,
                                 misconception=latest.misconception.value,
                             )
+                            log_activity(
+                                participant_code=get_participant_code(),
+                                session_id=get_pilot_session_id(),
+                                lab="Model Doctor",
+                                case_id=finding.rule_id,
+                                event_type="reasoning_submitted",
+                                choice=finding.concept,
+                                response_text=latest.text,
+                                status=latest.status,
+                                score=latest.score,
+                                hint_level=latest.hint_level,
+                                misconception=latest.misconception.value,
+                            )
                             if all(
                                 st.session_state.pedagogical_states.get(f.id) is not None
                                 and st.session_state.pedagogical_states[f.id].resolved
@@ -475,6 +497,15 @@ with tab_model:
                         if finding.hints:
                             level = min(level + 1, len(finding.hints))
                         st.session_state.hint_levels[finding.id] = level
+                        log_activity(
+                            participant_code=get_participant_code(),
+                            session_id=get_pilot_session_id(),
+                            lab="Model Doctor",
+                            case_id=finding.rule_id,
+                            event_type="hint_requested",
+                            choice=finding.concept,
+                            hint_level=level,
+                        )
                         st.rerun()
 
                 level = st.session_state.hint_levels.get(finding.id, 0)

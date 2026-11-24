@@ -1,6 +1,8 @@
 import streamlit as st
 from bai_ui.branding import AUTHOR, CONTACT_EMAIL, PROVENANCE
 from bai_ui.components import render_next_lab_banner
+from bai_ui.participant import get_participant_code, get_pilot_session_id
+from persistence import log_activity
 
 st.html("""
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -110,6 +112,15 @@ if not st.session_state.ch_submitted:
     if st.button("Submit my answer", type="primary", use_container_width=True):
         st.session_state.ch_answer = answer
         st.session_state.ch_submitted = True
+        log_activity(
+            participant_code=get_participant_code(),
+            session_id=get_pilot_session_id(),
+            lab="Challenge",
+            case_id="clinical_calibration_challenge",
+            event_type="challenge_submitted",
+            choice=answer,
+            status="correct" if answer == CORRECT else "incorrect",
+        )
         st.rerun()
 
 # ---------------------------------------------------------------------------

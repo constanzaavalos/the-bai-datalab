@@ -9,6 +9,8 @@ from bai_datalab.uncertainty_lab import (
 )
 from bai_ui.branding import AUTHOR, CONTACT_EMAIL, PROVENANCE
 from bai_ui.components import render_next_lab_banner
+from bai_ui.participant import get_participant_code, get_pilot_session_id
+from persistence import log_activity
 
 # ---------------------------------------------------------------------------
 # Styles
@@ -271,6 +273,17 @@ with tab_model:
     if st.button("Reveal Experiment A result", type="primary"):
         st.session_state.unc_more_data_revealed = True
         st.session_state.unc_more_data_prediction = exp1_prediction
+        exp1_status, _ = evaluate_uncertainty_reasoning("more_data", exp1_reasoning)
+        log_activity(
+            participant_code=get_participant_code(),
+            session_id=get_pilot_session_id(),
+            lab="Uncertainty Lab",
+            case_id="experiment_a_more_data",
+            event_type="experiment_a_revealed",
+            choice=exp1_prediction,
+            response_text=exp1_reasoning,
+            status=exp1_status,
+        )
 
     if st.session_state.get("unc_more_data_revealed"):
         comparison = pd.DataFrame({
@@ -296,6 +309,15 @@ with tab_model:
     )
     if st.button("Check Experiment B reasoning", type="primary"):
         status, feedback = evaluate_uncertainty_reasoning("prediction_interval", exp2_reasoning)
+        log_activity(
+            participant_code=get_participant_code(),
+            session_id=get_pilot_session_id(),
+            lab="Uncertainty Lab",
+            case_id="experiment_b_prediction_interval",
+            event_type="experiment_b_checked",
+            response_text=exp2_reasoning,
+            status=status,
+        )
         if status == "resolved":
             st.success("⚡ " + feedback)
         else:
@@ -310,6 +332,15 @@ with tab_model:
     )
     if st.button("Check Experiment C reasoning", type="primary"):
         status, feedback = evaluate_uncertainty_reasoning("ood", exp3_reasoning)
+        log_activity(
+            participant_code=get_participant_code(),
+            session_id=get_pilot_session_id(),
+            lab="Uncertainty Lab",
+            case_id="experiment_c_ood",
+            event_type="experiment_c_checked",
+            response_text=exp3_reasoning,
+            status=status,
+        )
         if status == "resolved":
             st.success("⚡ " + feedback)
         else:

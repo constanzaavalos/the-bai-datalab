@@ -9,6 +9,10 @@ if _CORE_SRC.exists() and str(_CORE_SRC) not in sys.path:
 
 from auth import instructor_is_authenticated
 from bai_ui.branding import APP_NAME
+from bai_ui.participant import (
+    init_participant_session,
+    log_page_view,
+)
 
 
 st.set_page_config(
@@ -52,5 +56,8 @@ pg = st.navigation(
     },
     position="sidebar",
 )
+
+init_participant_session()
+log_page_view(pg.title)
 
 pg.run()

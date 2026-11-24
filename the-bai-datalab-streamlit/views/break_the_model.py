@@ -4,6 +4,8 @@ import pandas as pd
 from bai_datalab.stress_lab import StressSettings, simulate_stress, evaluate_prediction
 from bai_ui.branding import AUTHOR, CONTACT_EMAIL, PROVENANCE
 from bai_ui.components import render_next_lab_banner
+from bai_ui.participant import get_participant_code, get_pilot_session_id
+from persistence import log_activity
 
 # ---------------------------------------------------------------------------
 # Styles
@@ -288,6 +290,17 @@ with tab_model:
         st.session_state.btm_candidate = candidate
         st.session_state.btm_prediction = prediction
         st.session_state.btm_reasoning = reasoning
+        btm_status, _ = evaluate_prediction(prediction, reasoning, base, candidate)
+        log_activity(
+            participant_code=get_participant_code(),
+            session_id=get_pilot_session_id(),
+            lab="Break the Model",
+            case_id=candidate.dominant_failure,
+            event_type="stress_test_run",
+            choice=prediction,
+            response_text=reasoning,
+            status=btm_status,
+        )
 
     if st.session_state.get("btm_revealed"):
         result = st.session_state.btm_candidate

@@ -8,6 +8,8 @@ from bai_datalab.ai_audit import (
 )
 from bai_ui.branding import AUTHOR, CONTACT_EMAIL, PROVENANCE
 from bai_ui.components import render_next_lab_banner
+from bai_ui.participant import get_participant_code, get_pilot_session_id
+from persistence import log_activity
 
 # ---------------------------------------------------------------------------
 # Styles
@@ -357,6 +359,14 @@ with tab_model:
                 level = st.session_state.audit_hint_level.get(case.case_id, 0)
                 level = min(level + 1, len(case.hints))
                 st.session_state.audit_hint_level[case.case_id] = level
+                log_activity(
+                    participant_code=get_participant_code(),
+                    session_id=get_pilot_session_id(),
+                    lab="Human vs AI Statistician",
+                    case_id=case.case_id,
+                    event_type="hint_requested",
+                    hint_level=level,
+                )
                 st.rerun()
 
         hint_level = st.session_state.audit_hint_level.get(case.case_id, 0)
@@ -369,6 +379,18 @@ with tab_model:
                 hint_level=max(hint_level, 0),
             )
             st.session_state.audit_outcomes[case.case_id] = result
+            log_activity(
+                participant_code=get_participant_code(),
+                session_id=get_pilot_session_id(),
+                lab="Human vs AI Statistician",
+                case_id=case.case_id,
+                event_type="audit_submitted",
+                choice=getattr(verdict, "value", str(verdict)),
+                response_text=reasoning,
+                status=getattr(result.status, "value", str(result.status)),
+                score=result.score,
+                hint_level=max(hint_level, 0),
+            )
             st.rerun()
 
         result = st.session_state.audit_outcomes.get(case.case_id)

@@ -59,11 +59,29 @@ CREATE TABLE IF NOT EXISTS attempts (
     FOREIGN KEY(finding_id) REFERENCES findings(finding_id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS activity_events (
+    event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    participant_code TEXT NOT NULL,
+    session_id TEXT NOT NULL,
+    lab TEXT NOT NULL,
+    case_id TEXT NOT NULL DEFAULT '',
+    event_type TEXT NOT NULL,
+    choice TEXT NOT NULL DEFAULT '',
+    response_text TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT '',
+    score REAL,
+    hint_level INTEGER NOT NULL DEFAULT 0,
+    misconception TEXT NOT NULL DEFAULT ''
+);
+
 CREATE INDEX IF NOT EXISTS idx_findings_session ON findings(session_id);
 CREATE INDEX IF NOT EXISTS idx_attempts_session ON attempts(session_id);
 CREATE INDEX IF NOT EXISTS idx_attempts_finding ON attempts(finding_id);
 CREATE INDEX IF NOT EXISTS idx_findings_concept ON findings(concept);
 CREATE INDEX IF NOT EXISTS idx_attempts_misconception ON attempts(misconception);
+CREATE INDEX IF NOT EXISTS idx_activity_participant ON activity_events(participant_code);
+CREATE INDEX IF NOT EXISTS idx_activity_lab ON activity_events(lab);
 """
 
 
@@ -294,5 +312,82 @@ def export_attempts_rows(db_path: str | Path | None = None) -> list[dict]:
                JOIN sessions s ON s.session_id=a.session_id
                JOIN findings f ON f.finding_id=a.finding_id
                ORDER BY a.created_at"""
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def log_activity(
+    participant_code: str,
+    session_id: str,
+    lab: str,
+    event_type: str,
+    case_id: str = "",
+    choice: str = "",
+    response_text: str = "",
+    status: str = "",
+    score: float | None = None,
+    hint_level: int = 0,
+    misconception: str = "",
+    db_path: str | Path | None = None,
+) -> dict:
+    """Record a cross-lab pilot activity event in SQLite and (if configured) Google Sheets."""
+    init_db(db_path)
+    now = _utcnow()
+    clean_code = (participant_code or "").strip().upper() or "anonymous"
+    row = {
+        "timestamp_utc": now,
+        "participant_code": clean_code,
+        "session_id": session_id or "",
+        "lab": lab,
+        "case_id": str(case_id or ""),
+        "event_type": event_type,
+        "choice": str(choice or ""),
+        "response_text": str(response_text or ""),
+        "status": str(status or ""),
+        "score": round(float(score), 4) if score is not None else None,
+        "hint_level": int(hint_level or 0),
+        "misconception": str(misconception or ""),
+    }
+    with connection(db_path) as con:
+        con.execute(
+            """INSERT INTO activity_events
+               (timestamp_utc, participant_code, session_id, lab, case_id, event_type,
+                choice, response_text, status, score, hint_level, misconception)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                row["timestamp_utc"],
+                row["participant_code"],
+                row["session_id"],
+                row["lab"],
+                row["case_id"],
+                row["event_type"],
+                row["choice"],
+                row["response_text"],
+                row["status"],
+                row["score"],
+                row["hint_level"],
+                row["misconception"],
+            ),
+        )
+
+    try:
+        from persistence.gsheets import append_activity_row
+
+        append_activity_row(row)
+    except Exception:
+        pass
+
+    return row
+
+
+def export_activity_events(db_path: str | Path | None = None) -> list[dict]:
+    init_db(db_path)
+    with connection(db_path) as con:
+        rows = con.execute(
+            """SELECT timestamp_utc, participant_code, session_id, lab, case_id,
+                      event_type, choice, response_text, status, score,
+                      hint_level, misconception
+               FROM activity_events
+               ORDER BY event_id"""
         ).fetchall()
     return [dict(r) for r in rows]
